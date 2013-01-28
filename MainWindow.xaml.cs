@@ -19,8 +19,6 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
     public partial class MainWindow : Window
     {
 
-        enum
-
         /// <summary>
         /// Width of output drawing
         /// </summary>
@@ -247,9 +245,11 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     }
                     if (skeletons != null)
                     {
-                        leftAngleOutputLabel.Content = calculateAngle(skeletons[0], JointType.ShoulderCenter, JointType.HipCenter, JointType.ShoulderLeft, JointType.WristLeft).ToString();
-                        rightAngleOutputLabel.Content = calculateAngle(skeletons[0], JointType.ShoulderCenter, JointType.HipCenter, JointType.ShoulderRight, JointType.WristRight).ToString();
-                        symbolOutputLabel.Content = GetIntValueFromAngle(calculateAngle(skeletons[0], JointType.ShoulderCenter, JointType.HipCenter, JointType.ShoulderLeft, JointType.WristLeft).ToString());
+                        // Right and left is different in the kinect world compared to ours...
+                        rightAngleOutputLabel.Content = calculateAngle(skeletons[0], JointType.ShoulderLeft, JointType.WristLeft, JointType.ShoulderCenter, JointType.HipCenter).ToString();
+                        leftAngleOutputLabel.Content = calculateAngle(skeletons[0], JointType.ShoulderCenter, JointType.HipCenter, JointType.ShoulderRight, JointType.WristRight).ToString();
+                         symbolOutputLabel.Content = GetIntValueFromAngle(calculateAngle(skeletons[0], JointType.ShoulderCenter, JointType.HipCenter, JointType.ShoulderRight, JointType.WristRight)).ToString();
+                        //symbolOutputLabel.Content = calculateSymbol();
                     }
 
 
@@ -269,10 +269,10 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             return null;
         }
 
-        private int GetIntValueFromAngle(int angle)
+        private int GetIntValueFromAngle(double angle)
         {
-            if(angle < 355) // checks if the angle is larger than 10 degrees and smaller than 180 degrees
-                return (int)Math.Floor((double)((angle + 22.5)/45.0));
+            if(angle < 337.5) // checks if the angle is larger than 10 degrees and smaller than 180 degrees
+                return (int)Math.Floor((angle + 22.5)/45.0);
             else 
                 return 0;
         }
@@ -403,7 +403,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             }
         }
         
-        private float calculateAngle(Skeleton skeleton, JointType startJoint1, JointType endJoint1,
+        private double calculateAngle(Skeleton skeleton, JointType startJoint1, JointType endJoint1,
                              JointType startJoint2, JointType endJoint2)
         {
             Joint joint1 = skeleton.Joints[startJoint1];
@@ -423,9 +423,17 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
             double dotProduct = Vector3D.DotProduct(vector1, vector2);
 
-            double angle = Math.Atan2(crossProductLength, dotProduct);
+            double angle = transformAngle(Math.Atan2(crossProductLength, dotProduct));
 
-            return (float)angle;
+            return angle*360/(2*Math.PI);
+        }
+
+        // Turns negative degrees into the expected positive ones
+        private double transformAngle(double angle)
+        {
+            if (angle < 0)
+                angle = 2 * Math.PI + angle;
+            return angle;
         }
     }
 }
