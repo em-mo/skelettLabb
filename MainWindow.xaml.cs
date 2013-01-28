@@ -19,8 +19,6 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
     public partial class MainWindow : Window
     {
 
-        enum
-
         /// <summary>
         /// Width of output drawing
         /// </summary>
@@ -247,8 +245,9 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     }
                     if (skeletons != null)
                     {
-                        leftAngleOutputLabel.Content = calculateAngle(skeletons[0], JointType.ShoulderCenter, JointType.HipCenter, JointType.ShoulderLeft, JointType.WristLeft).ToString();
-                        rightAngleOutputLabel.Content = calculateAngle(skeletons[0], JointType.ShoulderCenter, JointType.HipCenter, JointType.ShoulderRight, JointType.WristRight).ToString();
+                        // Right and left is different in the kinect world compared to ours...
+                        rightAngleOutputLabel.Content = calculateAngle(skeletons[0], JointType.ShoulderLeft, JointType.WristLeft, JointType.ShoulderCenter, JointType.HipCenter).ToString();
+                        leftAngleOutputLabel.Content = calculateAngle(skeletons[0], JointType.ShoulderCenter, JointType.HipCenter, JointType.ShoulderRight, JointType.WristRight).ToString();
                         //symbolOutputLabel.Content = calculateSymbol();
                     }
 
@@ -427,9 +426,17 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
             double dotProduct = Vector3D.DotProduct(vector1, vector2);
 
-            double angle = Math.Atan2(crossProductLength, dotProduct) % Math.PI * 2;
+            double angle = transformAngle(Math.Atan2(crossProductLength, dotProduct));
 
-            return (float)angle;
+            return (int)(angle*360/(2*Math.PI));
+        }
+
+        // Turns negative degrees into the expected positive ones
+        private double transformAngle(double angle)
+        {
+            if (angle < 0)
+                angle = 2 * Math.PI + angle;
+            return angle;
         }
     }
 }
