@@ -249,7 +249,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     {
                         leftAngleOutputLabel.Content = calculateAngle(skeletons[0], JointType.ShoulderCenter, JointType.HipCenter, JointType.ShoulderLeft, JointType.WristLeft).ToString();
                         rightAngleOutputLabel.Content = calculateAngle(skeletons[0], JointType.ShoulderCenter, JointType.HipCenter, JointType.ShoulderRight, JointType.WristRight).ToString();
-                        //symbolOutputLabel.Content = calculateSymbol();
+                        symbolOutputLabel.Content = GetIntValueFromAngle(calculateAngle(skeletons[0], JointType.ShoulderCenter, JointType.HipCenter, JointType.ShoulderLeft, JointType.WristLeft).ToString());
                     }
 
 
@@ -269,16 +269,12 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             return null;
         }
 
-        private int GetIntValueFromAngle(float angle)
+        private int GetIntValueFromAngle(int angle)
         {
-            double returnValue;
-            if(Math.PI/36 < angle || angle < Math.PI/2) // checks if the angle is larger than 10 degrees and smaller than 180 degrees
-                returnValue = Math.Floor(Math.PI/angle*5);
-            else if(angle < (Math.PI - Math.PI/36) || angle > Math.PI/2)
-                returnValue = Math.Floor(0.1);
-                
-            return 0;
-            
+            if(angle < 355) // checks if the angle is larger than 10 degrees and smaller than 180 degrees
+                return (int)Math.Floor((double)((angle + 22.5)/45.0));
+            else 
+                return 0;
         }
 
         /// <summary>
