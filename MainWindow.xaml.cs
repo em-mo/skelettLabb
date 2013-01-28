@@ -18,6 +18,9 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
     /// </summary>
     public partial class MainWindow : Window
     {
+
+        enum
+
         /// <summary>
         /// Width of output drawing
         /// </summary>
@@ -214,6 +217,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     skeletons = new Skeleton[skeletonFrame.SkeletonArrayLength];
                     skeletonFrame.CopySkeletonDataTo(skeletons);
                 }
+              
             }
 
             using (DrawingContext dc = this.drawingGroup.Open())
@@ -241,11 +245,40 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                             BodyCenterThickness);
                         }
                     }
+                    if (skeletons != null)
+                    {
+                        leftAngleOutputLabel.Content = calculateAngle(skeletons[0], JointType.ShoulderCenter, JointType.HipCenter, JointType.ShoulderLeft, JointType.WristLeft).ToString();
+                        rightAngleOutputLabel.Content = calculateAngle(skeletons[0], JointType.ShoulderCenter, JointType.HipCenter, JointType.ShoulderRight, JointType.WristRight).ToString();
+                        //symbolOutputLabel.Content = calculateSymbol();
+                    }
+
+
                 }
+
+
 
                 // prevent drawing outside of our render area
                 this.drawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, RenderWidth, RenderHeight));
             }
+        }
+
+        private string calculateSymbol(float leftAngle, float rightAngle )
+        {
+
+
+            return null;
+        }
+
+        private int GetIntValueFromAngle(float angle)
+        {
+            double returnValue;
+            if(Math.PI/36 < angle || angle < Math.PI/2) // checks if the angle is larger than 10 degrees and smaller than 180 degrees
+                returnValue = Math.Floor(Math.PI/angle*5);
+            else if(angle < (Math.PI - Math.PI/36) || angle > Math.PI/2)
+                returnValue = Math.Floor(0.1);
+                
+            return 0;
+            
         }
 
         /// <summary>
@@ -384,7 +417,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
             Vector3D vector1 = new Vector3D(joint2.Position.X - joint1.Position.X, joint2.Position.Y - joint1.Position.Y, joint2.Position.Z - joint1.Position.Z);
             Vector3D vector2 = new Vector3D(joint4.Position.X - joint3.Position.X, joint4.Position.Y - joint3.Position.Y, joint4.Position.Z - joint3.Position.Z);
-
+            
             vector1.Normalize();
             vector2.Normalize();
 
