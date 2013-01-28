@@ -394,7 +394,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
             double dotProduct = Vector3D.DotProduct(vector1, vector2);
 
-            double angle = Math.Atan2(crossProductLength, dotProduct);
+            double angle = Math.Atan2(crossProductLength, dotProduct) % Math.PI * 2;
 
             return (float)angle;
         }
