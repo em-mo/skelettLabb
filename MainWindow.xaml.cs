@@ -406,7 +406,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             }
         }
         
-        private float calculateAngle(Skeleton skeleton, JointType startJoint1, JointType endJoint1,
+        private double calculateAngle(Skeleton skeleton, JointType startJoint1, JointType endJoint1,
                              JointType startJoint2, JointType endJoint2)
         {
             Joint joint1 = skeleton.Joints[startJoint1];
@@ -428,7 +428,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
             double angle = transformAngle(Math.Atan2(crossProductLength, dotProduct));
 
-            return (int)(angle*360/(2*Math.PI));
+            return angle*360/(2*Math.PI);
         }
 
         // Turns negative degrees into the expected positive ones
