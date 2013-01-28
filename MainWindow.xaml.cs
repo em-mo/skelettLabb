@@ -212,6 +212,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     skeletons = new Skeleton[skeletonFrame.SkeletonArrayLength];
                     skeletonFrame.CopySkeletonDataTo(skeletons);
                 }
+              
             }
 
             using (DrawingContext dc = this.drawingGroup.Open())
@@ -241,9 +242,17 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     }
                 }
 
+                //symbolOutputLabel.Content = calculateSymbol();
+                //angleOutputLabel.Content = calculateAngle().ToString();
+
                 // prevent drawing outside of our render area
                 this.drawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, RenderWidth, RenderHeight));
             }
+        }
+
+        private string calculateSymbol(float angle)
+        {
+            return null;
         }
 
         /// <summary>
