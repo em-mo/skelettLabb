@@ -271,9 +271,12 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         private int GetIntValueFromAngle(float angle)
         {
-            
-            //if(
-            Double returnValue = Math.Floor(Math.PI/angle*4);
+            double returnValue;
+            if(Math.PI/36 < angle || angle < Math.PI/2) // checks if the angle is larger than 10 degrees and smaller than 180 degrees
+                returnValue = Math.Floor(Math.PI/angle*5);
+            else if(angle < (Math.PI - Math.PI/36) || angle > Math.PI/2)
+                returnValue = Math.Floor(0.1);
+                
             return 0;
             
         }
