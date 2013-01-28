@@ -1,0 +1,6 @@
+*.sln
+*.suo
+bin/
+Images/
+obj/
+Properties/
