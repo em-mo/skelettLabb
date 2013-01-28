@@ -10,6 +10,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
     using System.Windows;
     using System.Windows.Media;
     using Microsoft.Kinect;
+    using System;
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -290,7 +291,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             this.DrawBone(skeleton, drawingContext, JointType.HipRight, JointType.KneeRight);
             this.DrawBone(skeleton, drawingContext, JointType.KneeRight, JointType.AnkleRight);
             this.DrawBone(skeleton, drawingContext, JointType.AnkleRight, JointType.FootRight);
- 
+
             // Render Joints
             foreach (Joint joint in skeleton.Joints)
             {
@@ -298,11 +299,11 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
                 if (joint.TrackingState == JointTrackingState.Tracked)
                 {
-                    drawBrush = this.trackedJointBrush;                    
+                    drawBrush = this.trackedJointBrush;
                 }
                 else if (joint.TrackingState == JointTrackingState.Inferred)
                 {
-                    drawBrush = this.inferredJointBrush;                    
+                    drawBrush = this.inferredJointBrush;
                 }
 
                 if (drawBrush != null)
@@ -379,6 +380,35 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     this.sensor.SkeletonStream.TrackingMode = SkeletonTrackingMode.Default;
                 }
             }
+        }
+
+        private float calculateAngle(Skeleton skeleton, JointType startJoint1, JointType endJoint1,
+                                     JointType startJoint2, JointType endJoint2)
+        {
+            float[] vector1 = makeVector(skeleton.Joints[startJoint1], skeleton.Joints[endJoint1]);
+            float[] vector2 = makeVector(skeleton.Joints[startJoint2], skeleton.Joints[endJoint2]);
+            
+            return (float)Math.Acos((double)(dotProduct(vector1, vector2)/(vectorLength(vector1)*vectorLength(vector2))));
+        }
+
+        private float[] makeVector(Joint joint1, Joint joint2)
+        {
+            float[] vector = new float[3];
+            vector[0] = joint2.Position.X - joint1.Position.X;
+            vector[1] = joint2.Position.Y - joint1.Position.Y;
+            vector[2] = joint2.Position.Z - joint1.Position.Z;
+
+            return vector;
+        }
+
+        private float vectorLength(float[] vector)
+        {
+            return (float)Math.Sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
+        }
+
+        private float dotProduct(float[] vector1, float[] vector2)
+        {
+            return vector1[0] * vector2[0] + vector1[1] * vector2[1] + vector1[2] * vector2[2];
         }
     }
 }
