@@ -11,6 +11,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
     using System.Windows.Media;
     using Microsoft.Kinect;
     using System;
+    using System.Windows.Media.Media3D;
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -402,34 +403,22 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 }
             }
         }
-
+        
         private float calculateAngle(Skeleton skeleton, JointType startJoint1, JointType endJoint1,
-                                     JointType startJoint2, JointType endJoint2)
+                             JointType startJoint2, JointType endJoint2)
         {
-            float[] vector1 = makeVector(skeleton.Joints[startJoint1], skeleton.Joints[endJoint1]);
-            float[] vector2 = makeVector(skeleton.Joints[startJoint2], skeleton.Joints[endJoint2]);
+            Joint joint1 = skeleton.Joints[startJoint1];
+            Joint joint2 = skeleton.Joints[endJoint1];
+            Joint joint3 = skeleton.Joints[startJoint2];
+            Joint joint4 = skeleton.Joints[endJoint2];
+
+            Vector3D vector1 = new Vector3D(joint2.Position.X - joint1.Position.X, joint2.Position.Y - joint1.Position.Y, joint2.Position.Z - joint1.Position.Z);
+            Vector3D vector2 = new Vector3D(joint4.Position.X - joint3.Position.X, joint4.Position.Y - joint3.Position.Y, joint4.Position.Z - joint3.Position.Z);
             
-            return (float)Math.Acos((double)(dotProduct(vector1, vector2)/(vectorLength(vector1)*vectorLength(vector2))));
-        }
-
-        private float[] makeVector(Joint joint1, Joint joint2)
-        {
-            float[] vector = new float[3];
-            vector[0] = joint2.Position.X - joint1.Position.X;
-            vector[1] = joint2.Position.Y - joint1.Position.Y;
-            vector[2] = 0;
-
-            return vector;
-        }
-
-        private float vectorLength(float[] vector)
-        {
-            return (float)Math.Sqrt(vector[0] * vector[0] + vector[1] * vector[1] + vector[2] * vector[2]);
-        }
-
-        private float dotProduct(float[] vector1, float[] vector2)
-        {
-            return vector1[0] * vector2[0] + vector1[1] * vector2[1] + vector1[2] * vector2[2];
+            vector1.Normalize();
+            vector2.Normalize();
+            
+            return (float)Vector3D.AngleBetween(vector1, vector2);
         }
     }
 }
