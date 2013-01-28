@@ -388,7 +388,15 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             vector1.Normalize();
             vector2.Normalize();
 
-            return (float)Vector3D.AngleBetween(vector1, vector2);
+            Vector3D crossProduct = Vector3D.CrossProduct(vector1, vector2);
+
+            double crossProductLength = crossProduct.Z;
+
+            double dotProduct = Vector3D.DotProduct(vector1, vector2);
+
+            double angle = Math.Atan2(crossProductLength, dotProduct);
+
+            return (float)angle;
         }
     }
 }
