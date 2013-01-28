@@ -17,6 +17,9 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
     /// </summary>
     public partial class MainWindow : Window
     {
+
+        enum
+
         /// <summary>
         /// Width of output drawing
         /// </summary>
@@ -241,19 +244,37 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                             BodyCenterThickness);
                         }
                     }
+                    if (skeletons != null)
+                    {
+                        leftAngleOutputLabel.Content = calculateAngle(skeletons[0], JointType.ShoulderCenter, JointType.HipCenter, JointType.ShoulderLeft, JointType.WristLeft).ToString();
+                        rightAngleOutputLabel.Content = calculateAngle(skeletons[0], JointType.ShoulderCenter, JointType.HipCenter, JointType.ShoulderRight, JointType.WristRight).ToString();
+                        //symbolOutputLabel.Content = calculateSymbol();
+                    }
+
+
                 }
 
-                //symbolOutputLabel.Content = calculateSymbol();
-                //angleOutputLabel.Content = calculateAngle().ToString();
+
 
                 // prevent drawing outside of our render area
                 this.drawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, RenderWidth, RenderHeight));
             }
         }
 
-        private string calculateSymbol(float angle)
+        private string calculateSymbol(float leftAngle, float rightAngle )
         {
+
+
             return null;
+        }
+
+        private int GetIntValueFromAngle(float angle)
+        {
+            
+            //if(
+            Double returnValue = Math.Floor(Math.PI/angle*4);
+            return 0;
+            
         }
 
         /// <summary>
@@ -396,7 +417,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             float[] vector = new float[3];
             vector[0] = joint2.Position.X - joint1.Position.X;
             vector[1] = joint2.Position.Y - joint1.Position.Y;
-            vector[2] = joint2.Position.Z - joint1.Position.Z;
+            vector[2] = 0;
 
             return vector;
         }
