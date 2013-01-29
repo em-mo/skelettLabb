@@ -265,7 +265,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
                         if (CheckForPunch(0.2F, skeletons[0].Joints[JointType.HandLeft]))
                         {
-
+                            PlayWhipSound();
                         }
 
                     }
