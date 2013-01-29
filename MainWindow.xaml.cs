@@ -84,6 +84,11 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         /// </summary>
         private DrawingImage imageSource;
 
+        private const float PunchInitializeValue = 1.5F;
+        private const int PunchDeltaCount = 50;
+        private CircularBuffer punchDeltaBuffer;
+        private CircularBuffer punchPreviousPositionBuffer;
+
         /// <summary>
         /// Initializes a new instance of the MainWindow class.
         /// </summary>
@@ -184,6 +189,9 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             {
                 this.statusBarText.Text = Properties.Resources.NoKinectReady;
             }
+
+            punchDeltaBuffer = new CircularBuffer(PunchDeltaCount, 0);
+            punchPreviousPositionBuffer = new CircularBuffer(PunchDeltaCount, PunchInitializeValue);
         }
 
         /// <summary>
@@ -246,13 +254,19 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     if (skeletons != null)
                     {
                         // Right and left is different in the kinect world compared to ours...
-                        double leftAngle = calculateAngle(skeletons[0], JointType.ShoulderCenter, JointType.HipCenter, JointType.ShoulderRight, JointType.WristRight);
-                        double rightAngle = calculateAngle(skeletons[0], JointType.ShoulderLeft, JointType.WristLeft, JointType.ShoulderCenter, JointType.HipCenter);
+                        double leftAngle = CalculateAngle(skeletons[0], JointType.ShoulderCenter, JointType.HipCenter, JointType.ShoulderRight, JointType.WristRight);
+                        double rightAngle = CalculateAngle(skeletons[0], JointType.ShoulderLeft, JointType.WristLeft, JointType.ShoulderCenter, JointType.HipCenter);
 
                         rightAngleOutputLabel.Content = rightAngle;
                         leftAngleOutputLabel.Content = leftAngle;
                         //symbolOutputLabel.Content = GetIntValueFromAngle(calculateAngle(skeletons[0], JointType.ShoulderCenter, JointType.HipCenter, JointType.ShoulderRight, JointType.WristRight)).ToString();
                         symbolOutputLabel.Content = GetSymbol(leftAngle, rightAngle);
+
+                        if (CheckForPunch(0.2F, skeletons[0].Joints[JointType.HandLeft]))
+                        {
+
+                        }
+
                     }
 
 
@@ -317,6 +331,20 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 return (int)Math.Floor((angle + 22.5)/45.0);
             else 
                 return 0;*/
+        }
+
+        private bool CheckForPunch(float punchThreshold, Joint trackedJoint)
+        {
+            punchDeltaBuffer.SetNextValue(punchPreviousPositionBuffer.GetCurrent() - trackedJoint.Position.Z);
+            punchPreviousPositionBuffer.SetNextValue(trackedJoint.Position.Z);
+
+            if(punchDeltaBuffer.GetTotal() > punchThreshold)
+            {
+                punchDeltaBuffer.Reset();
+                return true;
+            }
+            else
+                return false;
         }
 
         /// <summary>
@@ -445,7 +473,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             }
         }
         
-        private double calculateAngle(Skeleton skeleton, JointType startJoint1, JointType endJoint1,
+        private double CalculateAngle(Skeleton skeleton, JointType startJoint1, JointType endJoint1,
                              JointType startJoint2, JointType endJoint2)
         {
             Joint joint1 = skeleton.Joints[startJoint1];
@@ -465,13 +493,13 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
             double dotProduct = Vector3D.DotProduct(vector1, vector2);
 
-            double angle = transformAngle(Math.Atan2(crossProductLength, dotProduct));
+            double angle = TransformAngle(Math.Atan2(crossProductLength, dotProduct));
 
             return angle*360/(2*Math.PI);
         }
 
         // Turns negative degrees into the expected positive ones
-        private double transformAngle(double angle)
+        private double TransformAngle(double angle)
         {
             if (angle < 0)
                 angle = 2 * Math.PI + angle;
