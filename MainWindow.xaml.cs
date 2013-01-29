@@ -85,10 +85,10 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         /// </summary>
         private DrawingImage imageSource;
 
-        private const float PunchInitializeValue = 1.5F;
-        private const int PunchDeltaCount = 50;
-        private CircularBuffer punchDeltaBuffer;
-        private CircularBuffer punchPreviousPositionBuffer;
+        private const float PunchInitializeValue = 0F;
+        private const float PunchDeltaQuotient = 2F;
+        private float punchDeltaBuffer;
+        private float punchPreviousPosition;
 
         /// <summary>
         /// Initializes a new instance of the MainWindow class.
@@ -191,8 +191,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 this.statusBarText.Text = Properties.Resources.NoKinectReady;
             }
 
-            punchDeltaBuffer = new CircularBuffer(PunchDeltaCount, 0);
-            punchPreviousPositionBuffer = new CircularBuffer(PunchDeltaCount, PunchInitializeValue);
+            punchDeltaBuffer = 0F;
+            punchPreviousPosition = PunchInitializeValue;
         }
 
         /// <summary>
@@ -259,11 +259,11 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                         double rightAngle = CalculateAngle(skeletons[0], JointType.ShoulderLeft, JointType.WristLeft, JointType.ShoulderCenter, JointType.HipCenter);
 
                         rightAngleOutputLabel.Content = rightAngle;
-                        leftAngleOutputLabel.Content = leftAngle;
+                        //leftAngleOutputLabel.Content = leftAngle;
                         //symbolOutputLabel.Content = GetIntValueFromAngle(calculateAngle(skeletons[0], JointType.ShoulderCenter, JointType.HipCenter, JointType.ShoulderRight, JointType.WristRight)).ToString();
                         symbolOutputLabel.Content = GetSymbol(leftAngle, rightAngle);
 
-                        if (CheckForPunch(0.2F, skeletons[0].Joints[JointType.HandLeft]))
+                        if (CheckForPunch(0.1F, skeletons[0].Joints[JointType.HandRight]))
                         {
                             PlayWhipSound();
                         }
@@ -310,7 +310,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                 case 12:
                     return "L";
                 case 65:
-                    PlayWhipSound();
+                    //PlayWhipSound();
                     return "SUCCESS";
                 default:
                     return "FAIL";
@@ -338,12 +338,15 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         private bool CheckForPunch(float punchThreshold, Joint trackedJoint)
         {
-            punchDeltaBuffer.SetNextValue(punchPreviousPositionBuffer.GetCurrent() - trackedJoint.Position.Z);
-            punchPreviousPositionBuffer.SetNextValue(trackedJoint.Position.Z);
+            leftAngleOutputLabel.Content = punchDeltaBuffer;
 
-            if(punchDeltaBuffer.GetTotal() > punchThreshold)
+            punchDeltaBuffer /= PunchDeltaQuotient;
+            punchDeltaBuffer += punchPreviousPosition - trackedJoint.Position.Z;
+            punchPreviousPosition = trackedJoint.Position.Z;
+            
+            if(punchDeltaBuffer > punchThreshold)
             {
-                punchDeltaBuffer.Reset();
+                punchDeltaBuffer = 0F;
                 return true;
             }
             else
