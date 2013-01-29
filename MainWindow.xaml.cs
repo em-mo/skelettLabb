@@ -246,10 +246,13 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     if (skeletons != null)
                     {
                         // Right and left is different in the kinect world compared to ours...
-                        rightAngleOutputLabel.Content = calculateAngle(skeletons[0], JointType.ShoulderLeft, JointType.WristLeft, JointType.ShoulderCenter, JointType.HipCenter).ToString();
-                        leftAngleOutputLabel.Content = calculateAngle(skeletons[0], JointType.ShoulderCenter, JointType.HipCenter, JointType.ShoulderRight, JointType.WristRight).ToString();
-                         symbolOutputLabel.Content = GetIntValueFromAngle(calculateAngle(skeletons[0], JointType.ShoulderCenter, JointType.HipCenter, JointType.ShoulderRight, JointType.WristRight)).ToString();
-                        //symbolOutputLabel.Content = calculateSymbol();
+                        double leftAngle = calculateAngle(skeletons[0], JointType.ShoulderCenter, JointType.HipCenter, JointType.ShoulderRight, JointType.WristRight);
+                        double rightAngle = calculateAngle(skeletons[0], JointType.ShoulderLeft, JointType.WristLeft, JointType.ShoulderCenter, JointType.HipCenter);
+
+                        rightAngleOutputLabel.Content = rightAngle;
+                        leftAngleOutputLabel.Content = leftAngle;
+                        //symbolOutputLabel.Content = GetIntValueFromAngle(calculateAngle(skeletons[0], JointType.ShoulderCenter, JointType.HipCenter, JointType.ShoulderRight, JointType.WristRight)).ToString();
+                        symbolOutputLabel.Content = GetSymbol(leftAngle, rightAngle);
                     }
 
 
@@ -262,19 +265,58 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             }
         }
 
-        private string calculateSymbol(float leftAngle, float rightAngle )
+        private string GetSymbol(double leftAngle, double rightAngle )
         {
+            //get right arm value
+            int rightArmValue = GetIntValueFromAngle(rightAngle);
+            int leftArmValue = 10 * GetIntValueFromAngle(leftAngle);
+            return CalculateSymbol(rightArmValue + leftArmValue);
+        }
 
 
-            return null;
+        private String CalculateSymbol(int symbolValue)
+        {
+            switch (symbolValue)
+            {
+                case 1:
+                    return "A";
+                    break;
+                case 2:
+                    return "B";
+                    break;
+                case 3:
+                    return "C";
+                    break;
+                case 4:
+                    return "D";
+                    break;
+                case 5:
+                    return "E";
+                    break;
+                case 11:
+                    return "K";
+                    break;
+                case 12:
+                    return "L";
+                    break;
+                case 65:
+                    return "SUCCESS";
+                    break;
+                default:
+                    return "FAIL";
+            }
+
         }
 
         private int GetIntValueFromAngle(double angle)
         {
+
+            return (int)Math.Floor((angle + 22.5)/45)%8;
+            /*
             if(angle < 337.5) // checks if the angle is larger than 10 degrees and smaller than 180 degrees
                 return (int)Math.Floor((angle + 22.5)/45.0);
             else 
-                return 0;
+                return 0;*/
         }
 
         /// <summary>
