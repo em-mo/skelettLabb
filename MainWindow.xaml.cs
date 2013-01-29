@@ -12,6 +12,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
     using Microsoft.Kinect;
     using System;
     using System.Windows.Media.Media3D;
+    using System.Media;
 
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -278,34 +279,36 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         {
             switch (symbolValue)
             {
+                case 0:
+                    return "Paus";
                 case 1:
                     return "A";
-                    break;
                 case 2:
                     return "B";
-                    break;
                 case 3:
                     return "C";
-                    break;
                 case 4:
                     return "D";
-                    break;
                 case 5:
                     return "E";
-                    break;
                 case 11:
                     return "K";
-                    break;
                 case 12:
                     return "L";
-                    break;
                 case 65:
+                    PlayWhipSound();
                     return "SUCCESS";
-                    break;
                 default:
                     return "FAIL";
             }
 
+        }
+
+        private void PlayWhipSound()
+        {
+            string path = System.IO.Directory.GetCurrentDirectory();
+            SoundPlayer player = new SoundPlayer(@path + "\\..\\..\\sounds\\whip.wav");
+            player.Play();
         }
 
         private int GetIntValueFromAngle(double angle)
