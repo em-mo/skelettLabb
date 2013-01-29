@@ -86,9 +86,11 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         private DrawingImage imageSource;
 
         private const float PunchInitializeValue = 0F;
-        private const float PunchDeltaQuotient = 2F;
+        private const float PunchDeltaQuotient = 1.4F;
+        private const float PunchThreshold = 0.21F;
         private float punchDeltaBuffer;
         private float punchPreviousPosition;
+        private SymbolDeterminator symbolDeterminator;
 
         /// <summary>
         /// Initializes a new instance of the MainWindow class.
@@ -193,6 +195,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
             punchDeltaBuffer = 0F;
             punchPreviousPosition = PunchInitializeValue;
+            symbolDeterminator = new SymbolDeterminator();
         }
 
         /// <summary>
@@ -252,29 +255,41 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                             BodyCenterThickness);
                         }
                     }
+                    // TDDD57-kod
                     if (skeletons != null)
                     {
                         // Right and left is different in the kinect world compared to ours...
-                        double leftAngle = CalculateAngle(skeletons[0], JointType.ShoulderCenter, JointType.HipCenter, JointType.ShoulderRight, JointType.WristRight);
-                        double rightAngle = CalculateAngle(skeletons[0], JointType.ShoulderLeft, JointType.WristLeft, JointType.ShoulderCenter, JointType.HipCenter);
+                        double rightAngle = CalculateAngle(skeletons[0], JointType.ShoulderCenter, JointType.HipCenter, JointType.ShoulderRight, JointType.WristRight);
+                        double leftAngle = CalculateAngle(skeletons[0], JointType.ShoulderLeft, JointType.WristLeft, JointType.ShoulderCenter, JointType.HipCenter);
 
                         rightAngleOutputLabel.Content = rightAngle;
-                        //leftAngleOutputLabel.Content = leftAngle;
+                        leftAngleOutputLabel.Content = leftAngle;
                         //symbolOutputLabel.Content = GetIntValueFromAngle(calculateAngle(skeletons[0], JointType.ShoulderCenter, JointType.HipCenter, JointType.ShoulderRight, JointType.WristRight)).ToString();
-                        symbolOutputLabel.Content = GetSymbol(leftAngle, rightAngle);
+                        
+                        string symbol = GetSymbol(leftAngle, rightAngle);
+                        symbolOutputLabel.Content = symbol;
+                        symbolDeterminator.DetermineStableSymbol(symbol);
+                        leftAngleOutputLabel.Content = symbolDeterminator.GetSymbol();
 
-                        if (CheckForPunch(0.1F, skeletons[0].Joints[JointType.HandRight]))
+                        if (CheckForPunch(PunchThreshold, skeletons[0].Joints[JointType.HandRight]))
                         {
+                            string sym = symbolDeterminator.GetSymbol();
+                            if (sym.Equals("back", StringComparison.Ordinal))
+                            {
+                                sym = (string)finalOutputLabel.Content;
+                                if (sym.Length != 0)
+                                {
+                                    sym = sym.Remove(sym.Length - 1);
+                                    finalOutputLabel.Content = sym;
+                                }
+                            }
+                            else
+                                finalOutputLabel.Content += sym;
+
                             PlayWhipSound();
                         }
-
                     }
-
-
                 }
-
-
-
                 // prevent drawing outside of our render area
                 this.drawingGroup.ClipGeometry = new RectangleGeometry(new Rect(0.0, 0.0, RenderWidth, RenderHeight));
             }
@@ -288,13 +303,12 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             return CalculateSymbol(rightArmValue + leftArmValue);
         }
 
-
         private String CalculateSymbol(int symbolValue)
         {
             switch (symbolValue)
             {
                 case 0:
-                    return "Paus";
+                    return " ";
                 case 1:
                     return "A";
                 case 2:
@@ -303,12 +317,52 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                     return "C";
                 case 4:
                     return "D";
-                case 5:
+                case 30:
                     return "E";
-                case 11:
+                case 20:
+                    return "F";
+                case 10:
+                    return "G";
+                case 72:
+                    return "H";
+                case 51:
+                    return "I";
+                case 24:
+                    return "J";
+                case 41:
                     return "K";
-                case 12:
+                case 13:
                     return "L";
+                case 21:
+                    return "M";
+                case 11:
+                    return "N";
+                case 52:
+                    return "O";
+                case 42:
+                    return "P";
+                case 32:
+                    return "Q";
+                case 22:
+                    return "R";
+                case 12:
+                    return "S";
+                case 43:
+                    return "T";
+                case 33:
+                    return "U";
+                case 14:
+                    return "V";
+                case 25:
+                    return "W";
+                case 15:
+                    return "X";
+                case 23:
+                    return "Y";
+                case 27:
+                    return "Z";
+                case 44:
+                    return "back";
                 case 65:
                     //PlayWhipSound();
                     return "SUCCESS";
@@ -327,23 +381,17 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
 
         private int GetIntValueFromAngle(double angle)
         {
-
             return (int)Math.Floor((angle + 22.5)/45)%8;
-            /*
-            if(angle < 337.5) // checks if the angle is larger than 10 degrees and smaller than 180 degrees
-                return (int)Math.Floor((angle + 22.5)/45.0);
-            else 
-                return 0;*/
         }
 
         private bool CheckForPunch(float punchThreshold, Joint trackedJoint)
         {
-            leftAngleOutputLabel.Content = punchDeltaBuffer;
-
             punchDeltaBuffer /= PunchDeltaQuotient;
             punchDeltaBuffer += punchPreviousPosition - trackedJoint.Position.Z;
             punchPreviousPosition = trackedJoint.Position.Z;
-            
+
+            rightAngleOutputLabel.Content = punchDeltaBuffer;
+
             if(punchDeltaBuffer > punchThreshold)
             {
                 punchDeltaBuffer = 0F;
