@@ -86,8 +86,8 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
         private DrawingImage imageSource;
 
         private const float PunchInitializeValue = 0F;
-        private const float PunchDeltaQuotient = 1.4F;
-        private const float PunchThreshold = 0.21F;
+        private const float PunchDeltaQuotient = 1.5F;
+        private const float PunchThreshold = 0.17F;
         private float punchDeltaBuffer;
         private float punchPreviousPosition;
         private SymbolDeterminator symbolDeterminator;
@@ -262,7 +262,7 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
                         double rightAngle = CalculateAngle(skeletons[0], JointType.ShoulderCenter, JointType.HipCenter, JointType.ShoulderRight, JointType.WristRight);
                         double leftAngle = CalculateAngle(skeletons[0], JointType.ShoulderLeft, JointType.WristLeft, JointType.ShoulderCenter, JointType.HipCenter);
 
-                        rightAngleOutputLabel.Content = rightAngle;
+                        rightAngleOutputLabel.Content = leftAngle;
                         leftAngleOutputLabel.Content = leftAngle;
                         //symbolOutputLabel.Content = GetIntValueFromAngle(calculateAngle(skeletons[0], JointType.ShoulderCenter, JointType.HipCenter, JointType.ShoulderRight, JointType.WristRight)).ToString();
                         
@@ -384,17 +384,17 @@ namespace Microsoft.Samples.Kinect.SkeletonBasics
             return (int)Math.Floor((angle + 22.5)/45)%8;
         }
 
+        private DateTime coolDown = DateTime.Now;
         private bool CheckForPunch(float punchThreshold, Joint trackedJoint)
         {
             punchDeltaBuffer /= PunchDeltaQuotient;
             punchDeltaBuffer += punchPreviousPosition - trackedJoint.Position.Z;
             punchPreviousPosition = trackedJoint.Position.Z;
 
-            rightAngleOutputLabel.Content = punchDeltaBuffer;
-
-            if(punchDeltaBuffer > punchThreshold)
+            if(punchDeltaBuffer > punchThreshold && coolDown.AddSeconds(0.4) < DateTime.Now)
             {
                 punchDeltaBuffer = 0F;
+                coolDown = DateTime.Now;
                 return true;
             }
             else
